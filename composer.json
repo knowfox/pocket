@@ -1,0 +1,26 @@
+{
+    "name": "knowfox/pocket",
+    "description": "Knowfox. Retrieve bookmarks from getpocket.com",
+    "type": "library",
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Olav Schettler",
+            "email": "olav@schettler.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Knowfox\\Pocket\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Knowfox\\Pocket\\ServiceProvider"
+            ]
+        }
+    }
+}
