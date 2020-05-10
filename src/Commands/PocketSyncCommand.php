@@ -15,7 +15,7 @@ class PocketSyncCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'pocket:sync';
+    protected $signature = 'pocket:sync {--since=}';
 
     /**
      * The console command description.
@@ -23,6 +23,8 @@ class PocketSyncCommand extends Command
      * @var string
      */
     protected $description = 'Sync contents from Pocket';
+
+    protected $since = null;
 
     /**
      * Create a new command instance.
@@ -36,42 +38,63 @@ class PocketSyncCommand extends Command
 
     protected function syncUser($pocket) {
         $this->info(' - ' .  $pocket->user->email);
+        $user_id = $pocket->user->id;
         $consumer_key = env('POCKET_CONSUMER_KEY');
         $pockpack = new Pockpack($consumer_key, $pocket->access_token);
 
-        $since = Carbon::now()->subMinutes(10)->getTimestamp();
+        if ($this->since) {
+            $since = $this->since;
+        }
+        else {
+            $since = Carbon::now()->subMinutes(10);
+        }
 
         $as_array = true;
         $list = $pockpack->retrieve([
             'state' => 'all',
             'detailType' => 'complete',
-            'since' => $since,
+            'since' => $since->getTimestamp(),
         ], /*as_array*/true);
 
         $bookmarks = Concept::where('parent_id', null)
-            ->where('owner_id', 1)
+            ->where('owner_id', $user_id)
             ->where('title', 'Bookmarks')
             ->first();
 
         foreach ($list['list'] as $item) {
-            $concept = Concept::firstOrCreate([
-                'source_url' => $item['given_url'],
-                'owner_id' => 1,
-            ], [
+            $data = [
                 'parent_id' => $bookmarks->id,
                 'title' => $item['given_title'],
                 'summary' => $item['excerpt'],
-            ]);
+                'source_url' => $item['given_url'],
+            ];
+
+            if (!empty($item['top_image_url'])) {
+                $data['config'] = [
+                    'image' => $item['top_image_url']
+                ];
+            }
+
+            $concept = Concept::firstOrCreate([
+                'source_url' => $item['given_url'],
+                'owner_id' => $user_id,
+            ], $data);
+            
             if (!empty($item['tags'])) {
                 $tags = array_map(function ($item) { return $item['tag']; }, $item['tags']);
                 $concept->retag($tags);
             }
+            $concept->tag('pocket');
             $this->info('   . ' . $item['given_title'] . " -> " . $concept->id);
         }
+        $last_sync_at = Carbon::now()->format('Y-m-d H:i:s');
+        $cnt = count($list['list']);
+
         $pocket->update([
-            'last_count' => count($list['list']),
-            'last_sync_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'last_count' => $cnt,
+            'last_sync_at' => $last_sync_at,
         ]);
+        error_log("[{$last_sync_at}] Pocket {$pocket->user->email} n={$cnt}\n", 3, "/tmp/knowfox.log");
     }
 
     /**
@@ -82,6 +105,14 @@ class PocketSyncCommand extends Command
     public function handle()
     {
         $this->info($this->description . '...');
+
+        $since = $this->option('since');
+        if ($since) {
+            $this->since = Carbon::parse($since);
+            $humane = $this->since->toDateTimeString();
+            $this->info(" ... since {$humane}");
+        }
+
         foreach (Pocket::with('user')->get() as $pocket) {
             $this->syncUser($pocket);
         }

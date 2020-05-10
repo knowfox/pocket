@@ -22,7 +22,7 @@
 
                     @forelse ($list as $item)
                         <h2 style="clear:both">{{ $item['given_title'] }}</h2>
-                        @if ($item['has_image'])
+                        @if (!empty($item['top_image_url']))
                             <img style="width: 100px; float:right" src="{{ $item['top_image_url'] }}">
                         @endif
                         <p>{{ $item['excerpt'] }}
