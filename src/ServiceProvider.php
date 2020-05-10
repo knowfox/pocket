@@ -5,7 +5,6 @@ namespace Knowfox\Pocket;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Knowfox\Pocket\Commands\PocketSyncCommand;
 use Illuminate\Console\Scheduling\Schedule;
-use Knowfox\Pocket\Commands\PocketSyncCommand;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
