@@ -64,7 +64,7 @@ class PocketSyncCommand extends Command
         foreach ($list['list'] as $item) {
             $data = [
                 'parent_id' => $bookmarks->id,
-                'title' => $item['given_title'],
+                'title' => $item['resolved_title'],
                 'summary' => $item['excerpt'],
                 'source_url' => $item['given_url'],
             ];

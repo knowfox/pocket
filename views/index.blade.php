@@ -21,7 +21,7 @@
                     <h1>Today's bookmarks</h1>
 
                     @forelse ($list as $item)
-                        <h2 style="clear:both">{{ $item['given_title'] }}</h2>
+                        <h2 style="clear:both">{{ $item['resolved_title'] }}</h2>
                         @if (!empty($item['top_image_url']))
                             <img style="width: 100px; float:right" src="{{ $item['top_image_url'] }}">
                         @endif
