@@ -33,7 +33,6 @@ class PocketController
         if ($invalid_token) {
             $pockpack = new PockpackAuth();
             $request_token = $pockpack->connect($consumer_key);
-            error_log("[index] consumer_key={$consumer_key}, request_token={$request_token}\n", 3, "/tmp/knowfox.log");
             session(['request_token' => $request_token]);
             $url = route('pocket.auth');
             return redirect()->away("https://getpocket.com/auth/authorize?request_token={$request_token}&redirect_uri={$url}");
@@ -50,7 +49,6 @@ class PocketController
         $pockpack = new PockpackAuth();
         $consumer_key = env('POCKET_CONSUMER_KEY');
         $request_token = session('request_token');
-        error_log("[auth] consumer_key={$consumer_key}, request_token={$request_token}\n", 3, "/tmp/knowfox.log");
         $access_token = $pockpack->receiveToken($consumer_key, $request_token);
         $pocket = Pocket::updateOrCreate([
             'user_id' => $request->user()->id,
