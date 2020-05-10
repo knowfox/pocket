@@ -7,7 +7,7 @@ use App\User;
 
 class Pocket extends Model
 {
-    protected $fillable = ['access_token', 'last_sync_at', 'user_id'];
+    protected $fillable = ['access_token', 'last_count', 'last_sync_at', 'user_id'];
     
     public function user()
     {

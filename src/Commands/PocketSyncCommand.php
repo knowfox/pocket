@@ -5,6 +5,8 @@ namespace Knowfox\Pocket\Commands;
 use Illuminate\Console\Command;
 use Knowfox\Pocket\Models\Pocket;
 use Duellsy\Pockpack\Pockpack;
+use Knowfox\Core\Models\Concept;
+use Carbon\Carbon;
 
 class PocketSyncCommand extends Command
 {
@@ -37,13 +39,39 @@ class PocketSyncCommand extends Command
         $consumer_key = env('POCKET_CONSUMER_KEY');
         $pockpack = new Pockpack($consumer_key, $pocket->access_token);
 
+        $since = Carbon::now()->subMinutes(10)->getTimestamp();
+
         $as_array = true;
         $list = $pockpack->retrieve([
             'state' => 'all',
             'detailType' => 'complete',
-            'count' => 3,
+            'since' => $since,
         ], /*as_array*/true);
-        var_dump($list);
+
+        $bookmarks = Concept::where('parent_id', null)
+            ->where('owner_id', 1)
+            ->where('title', 'Bookmarks')
+            ->first();
+
+        foreach ($list['list'] as $item) {
+            $concept = Concept::firstOrCreate([
+                'source_url' => $item['given_url'],
+                'owner_id' => 1,
+            ], [
+                'parent_id' => $bookmarks->id,
+                'title' => $item['given_title'],
+                'summary' => $item['excerpt'],
+            ]);
+            if (!empty($item['tags'])) {
+                $tags = array_map(function ($item) { return $item['tag']; }, $item['tags']);
+                $concept->retag($tags);
+            }
+            $this->info('   . ' . $item['given_title'] . " -> " . $concept->id);
+        }
+        $pocket->update([
+            'last_count' => count($list['list']),
+            'last_sync_at' => Carbon::now()->format('Y-m-d H:i:s'),
+        ]);
     }
 
     /**

@@ -4,6 +4,8 @@ namespace Knowfox\Pocket;
 
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Knowfox\Pocket\Commands\PocketSyncCommand;
+use Illuminate\Console\Scheduling\Schedule;
+use Knowfox\Pocket\Commands\PocketSyncCommand;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -24,7 +26,12 @@ class ServiceProvider extends IlluminateServiceProvider
             $this->commands([
                 PocketSyncCommand::class,
             ]);
-        }    
+        }
+        
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command(PocketSyncCommand::class)->everyTenMinutes();
+        });
     }
 
     public function register()
