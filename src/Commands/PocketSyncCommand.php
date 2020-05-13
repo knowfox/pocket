@@ -36,7 +36,8 @@ class PocketSyncCommand extends Command
         parent::__construct();
     }
 
-    protected function syncUser($pocket) {
+    protected function syncUser($pocket) 
+    {
         $this->info(' - ' .  $pocket->user->email);
         $user_id = $pocket->user->id;
         $consumer_key = env('POCKET_CONSUMER_KEY');
@@ -61,32 +62,8 @@ class PocketSyncCommand extends Command
             ->where('title', 'Bookmarks')
             ->first();
 
-        foreach ($list['list'] as $item) {
-            $data = [
-                'parent_id' => $bookmarks->id,
-                'title' => $item['resolved_title'],
-                'summary' => $item['excerpt'],
-                'source_url' => $item['given_url'],
-            ];
+        $pocket->saveBookmarks($list['list'], $bookmarks);
 
-            if (!empty($item['top_image_url'])) {
-                $data['config'] = [
-                    'image' => $item['top_image_url']
-                ];
-            }
-
-            $concept = Concept::firstOrCreate([
-                'source_url' => $item['given_url'],
-                'owner_id' => $user_id,
-            ], $data);
-            
-            if (!empty($item['tags'])) {
-                $tags = array_map(function ($item) { return $item['tag']; }, $item['tags']);
-                $concept->retag($tags);
-            }
-            $concept->tag('pocket');
-            $this->info('   . ' . $item['given_title'] . " -> " . $concept->id);
-        }
         $last_sync_at = Carbon::now()->format('Y-m-d H:i:s');
         $cnt = count($list['list']);
 

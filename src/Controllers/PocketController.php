@@ -13,7 +13,8 @@ class PocketController
     public function index(Request $request)
     {
         $consumer_key = env('POCKET_CONSUMER_KEY');
-        $pocket = Pocket::where('user_id', $request->user()->id)->first();
+        $user_id = $request->user()->id;
+        $pocket = Pocket::where('user_id', $user_id)->first();
 
         $invalid_token = true;
         if ($pocket) {
@@ -37,6 +38,13 @@ class PocketController
             $url = route('pocket.auth');
             return redirect()->away("https://getpocket.com/auth/authorize?request_token={$request_token}&redirect_uri={$url}");
         }
+
+        $bookmarks = Concept::where('parent_id', null)
+            ->where('owner_id', $user_id)
+            ->where('title', 'Bookmarks')
+            ->first();
+
+        $pocket->saveBookmarks($list['list'], $bookmarks);
 
         return view('pocket::index', [
             'pocket' => $pocket,
