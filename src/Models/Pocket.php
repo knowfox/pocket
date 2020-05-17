@@ -4,6 +4,7 @@ namespace Knowfox\Pocket\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use Knowfox\Core\Models\Concept;
 
 class Pocket extends Model
 {
@@ -14,13 +15,19 @@ class Pocket extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function saveBookmarks($list, $parent)
+    public function saveBookmarks($list, $parent, $command = null)
     {
         $user_id = $parent->owner_id;
+        $affected = [];
 
         foreach ($list as $item) {
+            $title = $item['resolved_title'];
+            if (!$title) {
+                $title = $item['given_url'];
+            }
+
             $data = [
-                'title' => $item['resolved_title'],
+                'title' => $title,
                 'summary' => $item['excerpt'],
                 'source_url' => $item['given_url'],
             ];
@@ -42,7 +49,14 @@ class Pocket extends Model
             }
             $concept->tag('pocket');
 
-            $concept->appendToNode($parent);
+            if (!$concept->parent_id) {
+                $concept->appendToNode($parent);
+            }
+            if ($command) {
+                $command->info('   . ' . $item['given_title'] . " -> " . $concept->id);
+            }
+            $affected[] = $concept;
         }
+        return $affected;
     }
 }

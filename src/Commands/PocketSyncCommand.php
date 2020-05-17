@@ -62,7 +62,7 @@ class PocketSyncCommand extends Command
             ->where('title', 'Bookmarks')
             ->first();
 
-        $pocket->saveBookmarks($list['list'], $bookmarks);
+        $pocket->saveBookmarks($list['list'], $bookmarks, $this);
 
         $last_sync_at = Carbon::now()->format('Y-m-d H:i:s');
         $cnt = count($list['list']);

@@ -21,13 +21,13 @@
                     <h1>Today's bookmarks</h1>
 
                     @forelse ($list as $item)
-                        <h2 style="clear:both">{{ $item['resolved_title'] }}</h2>
-                        @if (!empty($item['top_image_url']))
-                            <img style="width: 100px; float:right" src="{{ $item['top_image_url'] }}">
+                        <h2 style="clear:both">{{ $item->title }}</h2>
+                        @if (!empty($item->config->image))
+                            <img style="width: 100px; float:right" src="{{ $item->config->image }}">
                         @endif
-                        <p>{{ $item['excerpt'] }}
-                          <a href="{{ $item['given_url'] }}">more&nbsp;&hellip;</a>
-                        }</p>
+                        <p>{{ $item->summary }} - <a href="{{ $item->source_url }}">URL</a> /
+                          <a href="{{ env('APP_URL') }}/{{ $item->id }}">more&nbsp;&hellip;</a>
+                        </p>
                     @empty
                         <p>(None today)</p>
                     @endforelse

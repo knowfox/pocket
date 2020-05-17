@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Duellsy\Pockpack\Pockpack;
 use Duellsy\Pockpack\PockpackAuth;
 use Knowfox\Pocket\Models\Pocket;
+use Knowfox\Core\Models\Concept;
 use Carbon\Carbon;
 
 class PocketController
@@ -39,16 +40,16 @@ class PocketController
             return redirect()->away("https://getpocket.com/auth/authorize?request_token={$request_token}&redirect_uri={$url}");
         }
 
-        $bookmarks = Concept::where('parent_id', null)
+        $parent = Concept::where('parent_id', null)
             ->where('owner_id', $user_id)
             ->where('title', 'Bookmarks')
             ->first();
 
-        $pocket->saveBookmarks($list['list'], $bookmarks);
+        $bookmarks = $pocket->saveBookmarks($list['list'], $parent);
 
         return view('pocket::index', [
             'pocket' => $pocket,
-            'list' => $list['list'],
+            'list' => $bookmarks,
         ]);
     }
 
