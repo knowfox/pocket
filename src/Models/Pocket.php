@@ -51,6 +51,7 @@ class Pocket extends Model
 
             if (!$concept->parent_id) {
                 $concept->appendToNode($parent);
+                $concept->save();
             }
             if ($command) {
                 $command->info('   . ' . $item['given_title'] . " -> " . $concept->id);
