@@ -39,11 +39,19 @@ class Pocket extends Model
                 ];
             }
 
-            $concept = Concept::firstOrCreate([
-                'source_url' => $item['given_url'],
-                'owner_id' => $user_id,
-            ], $data);
-            
+            try {
+                $concept = Concept::firstOrCreate([
+                    'source_url' => $item['given_url'],
+                    'owner_id' => $user_id,
+                ], $data);
+            }
+            catch (QueryException $e) {
+                if ($command) {
+                    $command->error('   . ' . $item['given_title'] . " ERR: " . json_encode($e->errorInfo));
+                }
+                continue;
+            }
+        
             if (!empty($item['tags'])) {
                 $tags = array_map(function ($item) { return $item['tag']; }, $item['tags']);
                 $concept->retag($tags);
@@ -59,6 +67,7 @@ class Pocket extends Model
                     if ($command) {
                         $command->error('   . ' . $item['given_title'] . " ERR: " . json_encode($e->errorInfo));
                     }
+                    continue;
                 }
             }
             if ($command) {
