@@ -5,6 +5,7 @@ namespace Knowfox\Pocket\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\User;
 use Knowfox\Core\Models\Concept;
+use Illuminate\Database\QueryException;
 
 class Pocket extends Model
 {
@@ -51,7 +52,14 @@ class Pocket extends Model
 
             if (!$concept->parent_id) {
                 $concept->appendToNode($parent);
-                $concept->save();
+                try {
+                    $concept->save();
+                }
+                catch (QueryException $e) {
+                    if ($command) {
+                        $command->error('   . ' . $item['given_title'] . " ERR: " . json_encode($e->errorInfo));
+                    }
+                }
             }
             if ($command) {
                 $command->info('   . ' . $item['given_title'] . " -> " . $concept->id);
