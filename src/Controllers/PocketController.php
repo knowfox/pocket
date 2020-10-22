@@ -3,9 +3,9 @@
 namespace Knowfox\Pocket\Controllers;
 
 use Illuminate\Http\Request;
-use Pocket\Pocket as PocketApi;
+use Pocket as PocketApi;
 use Knowfox\Pocket\Models\Pocket;
-use Knowfox\Core\Models\Concept;
+use Knowfox\Models\Concept;
 use Carbon\Carbon;
 
 class PocketController

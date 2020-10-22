@@ -4,7 +4,7 @@ namespace Knowfox\Pocket\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
-use Knowfox\Core\Models\Concept;
+use Knowfox\Models\Concept;
 use Illuminate\Database\QueryException;
 
 class Pocket extends Model
