@@ -1,7 +1,7 @@
 {
     "name": "knowfox/pocket",
     "description": "Knowfox. Retrieve bookmarks from getpocket.com",
-    "type": "library",
+    "type": "laravel-package",
     "license": "GPLv3",
     "authors": [
         {
@@ -10,7 +10,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "djchen/pocket-api-php": "^0.2"
+    },
     "autoload": {
         "psr-4": {
             "Knowfox\\Pocket\\": "src/"
