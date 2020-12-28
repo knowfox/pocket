@@ -3,7 +3,7 @@
 namespace Knowfox\Pocket\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
+use App\Models\User;
 use Knowfox\Models\Concept;
 use Illuminate\Database\QueryException;
 
