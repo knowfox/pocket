@@ -4,8 +4,7 @@ namespace Knowfox\Pocket\Commands;
 
 use Illuminate\Console\Command;
 use Knowfox\Pocket\Models\Pocket;
-use Duellsy\Pockpack\Pockpack;
-use Knowfox\Core\Models\Concept;
+use Knowfox\Pocket\Services\PocketService;
 use Carbon\Carbon;
 
 class PocketSyncCommand extends Command
@@ -38,10 +37,9 @@ class PocketSyncCommand extends Command
 
     protected function syncUser($pocket) 
     {
-        $this->info(' - ' .  $pocket->user->email);
+        $this->info('    . ' .  $pocket->user->email);
+        $service = new PocketService();
         $user_id = $pocket->user->id;
-        $consumer_key = env('POCKET_CONSUMER_KEY');
-        $pockpack = new Pockpack($consumer_key, $pocket->access_token);
 
         if ($this->since) {
             $since = $this->since;
@@ -49,25 +47,18 @@ class PocketSyncCommand extends Command
         else {
             $since = Carbon::now()->subMinutes(10);
         }
-
-        $as_array = true;
-        $list = $pockpack->retrieve([
-            'state' => 'all',
-            'detailType' => 'complete',
-            'since' => $since->getTimestamp(),
-        ], /*as_array*/true);
-
-        $bookmarks = Concept::where('parent_id', null)
-            ->where('owner_id', $user_id)
-            ->where('title', 'Bookmarks')
-            ->first();
-
-        $pocket->saveBookmarks($list['list'], $bookmarks, $this);
+        $info = $service->saveBookmarks($user_id, $since);
+        if (!$info) {
+            $this->error('Invalid token. Please renew');
+            return;
+        }
 
         $last_sync_at = Carbon::now()->format('Y-m-d H:i:s');
-        $cnt = count($list['list']);
 
-        $pocket->update([
+        $cnt = count($info['list']);
+        $this->info('    . saved ' . $cnt . ' bookmarks');
+
+        $info['pocket']->update([
             'last_count' => $cnt,
             'last_sync_at' => $last_sync_at,
         ]);
@@ -89,6 +80,8 @@ class PocketSyncCommand extends Command
             $humane = $this->since->toDateTimeString();
             $this->info(" ... since {$humane}");
         }
+
+        $this->info(' - ' . Pocket::count() . ' users have link to pocket');
 
         foreach (Pocket::with('user')->get() as $pocket) {
             $this->syncUser($pocket);

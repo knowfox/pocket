@@ -4,38 +4,18 @@ namespace Knowfox\Pocket\Controllers;
 
 use Illuminate\Http\Request;
 use Pocket as PocketApi;
-use Knowfox\Pocket\Models\Pocket;
-use Knowfox\Models\Concept;
+use Knowfox\Pocket\Services\PocketService;
 use Carbon\Carbon;
 
 class PocketController
 {
     public function index(Request $request)
     {
-        $consumer_key = env('POCKET_CONSUMER_KEY');
+        $service = new PocketService();
         $user_id = $request->user()->id;
-        $pocket = Pocket::where('user_id', $user_id)->first();
+        $info = $service->saveBookmarks($user_id, Carbon::today());
 
-        $invalid_token = true;
-        if ($pocket) {
-            $today = Carbon::today()->getTimestamp();
-
-            $api = new PocketApi([
-                'consumerKey' => $consumer_key
-            ]);
-            $api->setAccessToken($pocket->access_token);
-
-            $list = $api->retrieve([
-                'state' => 'all',
-                'since' => $today,
-                'detailType' => 'simple',
-            ]);
-            if ($list) {
-                $invalid_token = false;
-            }
-        }
-
-        if ($invalid_token) {
+        if (!$info) {
             $api = new PocketApi([
                 'consumerKey' => $consumer_key
             ]);
@@ -47,17 +27,7 @@ class PocketController
             return redirect()->away($result['redirect_uri']);
         }
 
-        $parent = Concept::where('parent_id', null)
-            ->where('owner_id', $user_id)
-            ->where('title', 'Bookmarks')
-            ->first();
-
-        $bookmarks = $pocket->saveBookmarks($list['list'], $parent);
-
-        return view('pocket::index', [
-            'pocket' => $pocket,
-            'list' => $bookmarks,
-        ]);
+        return view('pocket::index', $info);
     }
 
     public function auth(Request $request)
@@ -67,7 +37,8 @@ class PocketController
             'consumerKey' => $consumer_key
         ]);
         $request_token = session('request_token');
-        $user = $api->convertToken($request->authorized);
+        //$user = $api->convertToken($request->authorized);
+        $user = $api->convertToken($request_token);
         $pocket = Pocket::updateOrCreate([
             'user_id' => $request->user()->id,
         ], [
