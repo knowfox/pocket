@@ -16,7 +16,7 @@ class CreateAuthsTable extends Migration
         Schema::create('pockets', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('access_token');
-            $table->Integer('user_id')->unsigned();
+            $table->bigInteger('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
             $table->Integer('last_count')->unsigned()->default(0);
             $table->timestamp('last_sync_at')->nullable();

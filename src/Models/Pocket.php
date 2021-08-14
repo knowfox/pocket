@@ -3,8 +3,8 @@
 namespace Knowfox\Pocket\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
-use Knowfox\Core\Models\Concept;
+use App\Models\User;
+use Knowfox\Models\Concept;
 use Illuminate\Database\QueryException;
 
 class Pocket extends Model
@@ -22,10 +22,10 @@ class Pocket extends Model
         $affected = [];
 
         foreach ($list as $item) {
-            $title = $item['resolved_title'];
-            if (!$title) {
-                $title = $item['given_url'];
+            if ($item['status'] !== '0' || !isset($item['given_url'])) {
+                continue;
             }
+            $title = isset($item['resolved_title']) ? $item['resolved_title'] : $item['given_title'];
 
             $data = [
                 'title' => $title,
