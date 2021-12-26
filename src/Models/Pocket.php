@@ -26,10 +26,11 @@ class Pocket extends Model
                 continue;
             }
             $title = isset($item['resolved_title']) ? $item['resolved_title'] : $item['given_title'];
+            $excerpt = isset($item['excerpt']) ? $item['excerpt'] : '';
 
             $data = [
                 'title' => $title,
-                'summary' => $item['excerpt'],
+                'summary' => $excerpt,
                 'source_url' => $item['given_url'],
             ];
 
