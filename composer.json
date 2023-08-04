@@ -10,7 +10,6 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
     "autoload": {
         "psr-4": {
             "Knowfox\\Pocket\\": "src/"
@@ -22,5 +21,8 @@
                 "Knowfox\\Pocket\\ServiceProvider"
             ]
         }
+    },
+    "require": {
+        "duellsy/pockpack": "dev-master"
     }
 }
