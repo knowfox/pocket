@@ -24,6 +24,6 @@
     },
     "require": {
         "duellsy/pockpack": "dev-master",
-        "symfony/event-dispatcher": "7.0.x-dev"
+        "symfony/event-dispatcher": "6.3"
     }
 }
